@@ -5,6 +5,7 @@ const getObjectById = require("./CRUD/getObjectById");
 const uploadObjects = require("./CRUD/uploadObjects");
 const putObject = require("./CRUD/putObject");
 const deleteObject = require("./CRUD/deleteObject");
+const getSignedUrl = require("./CRUD/getSignedUrl");
 
 require("dotenv").config();
 const morgan = require("morgan");
@@ -16,7 +17,7 @@ const host = process.env.HOST;
 const app = express();
 app.use(express.json());
 app.use(morgan("dev")); //use morgan to log HTTP request in console
-app.use("/static", express.static("./static/"));
+//app.use("/static", express.static("./static/"));
 
 app.post("/upload", upload.array("files"), async (req, res) => {
   const result = await uploadObjects(req.files);
@@ -60,6 +61,14 @@ app.get("/images/:id", async (req, res) => {
   writeSteam.write(stream);
 });
 
+app.get("/getSignedUrl", (req, res) => {
+  const url = getSignedUrl();
+  res.status(200).json({
+    message: "Signed URL is generated successfully !",
+    url: url,
+  });
+});
+
 app.delete("/delete/:id", async (req, res) => {
   const key = req.params.id;
   const result = await deleteObject(key);
@@ -69,10 +78,6 @@ app.delete("/delete/:id", async (req, res) => {
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
-
-/* app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/JS knowledges/index.html");
-}); */
 
 app.listen(port, host, () => {
   console.log(`This server is listening on ${host}:${port} for connections...`);
